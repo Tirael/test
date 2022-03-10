@@ -1,0 +1,1588 @@
+﻿<UserControl x:Class="zzz.JournalModule.Views.CommonJournalView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:commands="clr-namespace:zzz.Common.Infrastructure.Commands;assembly=zzz.Common"
+             xmlns:controls="clr-namespace:zzz.Common.Controls;assembly=zzz.Common"
+             xmlns:controls1="clr-namespace:zzz.Common.Infrastructure.Controls;assembly=zzz.Common"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:enumerations="clr-namespace:zzz.Common.Infrastructure.Enumerations;assembly=zzz.Common"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:infrastructure="clr-namespace:zzz.Common.Infrastructure;assembly=zzz.Common"
+             xmlns:interactionRequest="clr-namespace:Microsoft.Practices.Prism.Interactivity.InteractionRequest;assembly=Microsoft.Practices.Prism.Interactivity"
+             xmlns:interactionRequests="clr-namespace:zzz.Common.Infrastructure.InteractionRequests;assembly=zzz.Common"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mvvmAnimation="clr-namespace:zzz.Common;assembly=zzz.Common"
+             xmlns:telerik="http://schemas.telerik.com/2008/xaml/presentation"
+             xmlns:viewModels="clr-namespace:zzz.JournalModule.ViewModels"
+             xmlns:moduleSettings="clr-namespace:zzz.JournalModule.ModuleSettings"
+             xmlns:viewModels1="clr-namespace:zzz.Common.Infrastructure.ViewModels;assembly=zzz.Common"
+             xmlns:converters="clr-namespace:zzz.Foundation.Wpf.Converters;assembly=zzz.Foundation.Wpf"
+             xmlns:cases="clr-namespace:zzz.Foundation.Wpf.Converters.Cases;assembly=zzz.Foundation.Wpf"
+             xmlns:behaviors="clr-namespace:zzz.Common.Infrastructure.Behaviors;assembly=zzz.Common"
+             xmlns:ctrl="clr-namespace:zzz.Common.Controls.JournalListView;assembly=zzz.Common"
+             xmlns:enumerations1="clr-namespace:zzz.UI.Common.Infrastructure.Enumerations;assembly=zzz.UI.Common"
+             xmlns:viewModels2="clr-namespace:zzz.UI.Journals.Infrastructure.ViewModels;assembly=zzz.UI.Journals"
+             x:Name="CommonJournal"
+             d:DataContext="{d:DesignInstance viewModels:CommonJournalViewModel,
+                                              IsDesignTimeCreatable=False}"
+             d:DesignHeight="200"
+             d:DesignWidth="1200"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/zzz.Common;component/Themes/Common.xaml" />
+                <ResourceDictionary Source="/zzz.Common;component/Themes/Animations.xaml" />
+                <ResourceDictionary Source="/zzz.JournalModule;component/Themes/JournalGridViewStyles.xaml" />
+                <ResourceDictionary Source="/zzz.JournalModule;component/Themes/JournalCommonStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <converters:SwitchConverter x:Key="VersionVisibilityConverter"
+                                        Default="{x:Static Visibility.Visible}">
+                <cases:EqualsCase Key="{x:Static enumerations1:ApplicationVersion.OMPS}"
+                                  Value="{x:Static Visibility.Collapsed}" />
+            </converters:SwitchConverter>
+            
+            <telerik:ColorToBrushConverter x:Key="ColorToBrushConverter" />
+
+            <DataTemplate x:Key="RequestChangeDateTimeRangeTemplate">
+                <TextBlock HorizontalAlignment="Center"
+                           Style="{DynamicResource DefaultListTemplateItemStyle}"
+                           Text="{Binding .}" />
+            </DataTemplate>
+
+            <!-- TODO -->
+            <DataTemplate x:Key="ExportFailedRequestTemplate">
+                <TextBlock HorizontalAlignment="Center"
+                           Style="{DynamicResource DefaultListTemplateItemStyle}"
+                           Text="{Binding .}" />
+            </DataTemplate>
+
+            <Style x:Key="CustomScrollViewer"
+                   TargetType="{x:Type ScrollViewer}">
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="IsTabStop" Value="False" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                            <Grid Background="{TemplateBinding Background}"
+                                  SnapsToDevicePixels="true">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <DockPanel Margin="{TemplateBinding Padding}">
+                                    <ScrollViewer DockPanel.Dock="Top"
+                                                  Focusable="false"
+                                                  HorizontalScrollBarVisibility="Hidden"
+                                                  VerticalScrollBarVisibility="Hidden">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <GridViewHeaderRowPresenter Grid.Row="0"
+                                                                        Margin="2,0,2,0"
+                                                                        AllowsColumnReorder="{Binding TemplatedParent.View.AllowsColumnReorder,
+                                                                                                      RelativeSource={RelativeSource TemplatedParent}}"
+                                                                        ColumnHeaderContainerStyle="{Binding TemplatedParent.View.ColumnHeaderContainerStyle,
+                                                                                                             RelativeSource={RelativeSource TemplatedParent}}"
+                                                                        ColumnHeaderContextMenu="{Binding TemplatedParent.View.ColumnHeaderContextMenu,
+                                                                                                          RelativeSource={RelativeSource TemplatedParent}}"
+                                                                        ColumnHeaderStringFormat="{Binding TemplatedParent.View.ColumnHeaderStringFormat,
+                                                                                                           RelativeSource={RelativeSource TemplatedParent}}"
+                                                                        ColumnHeaderTemplate="{Binding TemplatedParent.View.ColumnHeaderTemplate,
+                                                                                                       RelativeSource={RelativeSource TemplatedParent}}"
+                                                                        ColumnHeaderTemplateSelector="{Binding TemplatedParent.View.ColumnHeaderTemplateSelector,
+                                                                                                               RelativeSource={RelativeSource TemplatedParent}}"
+                                                                        ColumnHeaderToolTip="{Binding TemplatedParent.View.ColumnHeaderToolTip,
+                                                                                                      RelativeSource={RelativeSource TemplatedParent}}"
+                                                                        Columns="{Binding TemplatedParent.View.Columns,
+                                                                                          RelativeSource={RelativeSource TemplatedParent}}"
+                                                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                            <telerik:RadButton x:Name="HasMoreItemsButton"
+                                                               Grid.Row="1"
+                                                               Margin="2,1,2,1"
+                                                               HorizontalContentAlignment="Center"
+                                                               VerticalContentAlignment="Center"
+                                                               Command="{Binding Path=AllEntriesHasMoreItems}"
+                                                               Content="Есть новые сообщения"
+                                                               telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}"
+                                                               Visibility="{Binding Path=AllEntries.HasMoreItems,
+                                                                                    Mode=OneWay,
+                                                                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                        </Grid>
+                                    </ScrollViewer>
+                                    <ScrollContentPresenter x:Name="PART_ScrollContentPresenter"
+                                                            CanContentScroll="{TemplateBinding CanContentScroll}"
+                                                            Content="{TemplateBinding Content}"
+                                                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                            KeyboardNavigation.DirectionalNavigation="Local"
+                                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                </DockPanel>
+                                <ScrollBar x:Name="PART_HorizontalScrollBar"
+                                           Grid.Row="1"
+                                           Cursor="Arrow"
+                                           Maximum="{TemplateBinding ScrollableWidth}"
+                                           Minimum="0.0"
+                                           Orientation="Horizontal"
+                                           ViewportSize="{TemplateBinding ViewportWidth}"
+                                           Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"
+                                           Value="{Binding HorizontalOffset,
+                                                           Mode=OneWay,
+                                                           RelativeSource={RelativeSource TemplatedParent}}" />
+                                <ScrollBar x:Name="PART_VerticalScrollBar"
+                                           Grid.Column="1"
+                                           Cursor="Arrow"
+                                           Maximum="{TemplateBinding ScrollableHeight}"
+                                           Minimum="0.0"
+                                           Orientation="Vertical"
+                                           ViewportSize="{TemplateBinding ViewportHeight}"
+                                           Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                                           Value="{Binding VerticalOffset,
+                                                           Mode=OneWay,
+                                                           RelativeSource={RelativeSource TemplatedParent}}" />
+                                <DockPanel Grid.Row="1"
+                                           Grid.Column="1"
+                                           Background="{Binding Background,
+                                                                ElementName=PART_VerticalScrollBar}"
+                                           LastChildFill="false">
+                                    <Rectangle Width="1"
+                                               DockPanel.Dock="Left"
+                                               Fill="White"
+                                               Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" />
+                                    <Rectangle Height="1"
+                                               DockPanel.Dock="Top"
+                                               Fill="White"
+                                               Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}" />
+                                </DockPanel>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="CustomListViewStyle"
+                   BasedOn="{StaticResource {x:Type ListView}}"
+                   TargetType="{x:Type ListView}">
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="IsTabStop" Value="False" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+                <Setter Property="OverridesDefaultStyle" Value="True" />
+                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden" />
+                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Visible" />
+                <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ListView}">
+                            <Grid>
+                                <Border x:Name="Border"
+                                        Background="{x:Null}"
+                                        BorderBrush="{x:Null}"
+                                        BorderThickness="1">
+                                    <ScrollViewer Foreground="{DynamicResource ListViewScrollViewerForeground}"
+                                                  Style="{StaticResource CustomScrollViewer}">
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </Border>
+                                <telerik:RadBusyIndicator x:Name="InitializingGrid"
+                                                          BusyContent="Инициализация..."
+                                                          IsBusy="True"
+                                                          IsIndeterminate="True"
+                                                          telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}"
+                                                          Visibility="Collapsed" />
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <!--
+                                    <Trigger Property="IsGrouping" Value="true">
+                                    <Setter Property="ScrollViewer.CanContentScroll" Value="false" />
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="false">
+                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource ListViewEnabledBorderBackground}" />
+                                    </Trigger>
+                                -->
+                                <DataTrigger Binding="{Binding Path=AllEntries.IsInitializing}"
+                                             Value="True">
+                                    <Setter TargetName="InitializingGrid" Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="CustomListViewItemStyle"
+                   TargetType="{x:Type ListViewItem}">
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="IsTabStop" Value="False" />
+                <Setter Property="Foreground" Value="{DynamicResource RowForeground}" />
+                <Setter Property="FocusVisualStyle" Value="{StaticResource ListViewItemFocusVisual}" />
+                <Setter Property="Background" Value="{DynamicResource ItemBackground}" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="BorderBrush" Value="{x:Null}" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Margin" Value="0,0,0,1" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ListViewItem}">
+                            <ControlTemplate.Resources>
+                                <Storyboard x:Key="HoverOn">
+                                    <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+                                                                   Storyboard.TargetName="HoverRectangle"
+                                                                   Storyboard.TargetProperty="(UIElement.Opacity)">
+                                        <SplineDoubleKeyFrame KeyTime="00:00:00.1000000"
+                                                              Value="1" />
+                                    </DoubleAnimationUsingKeyFrames>
+                                </Storyboard>
+                                <Storyboard x:Key="HoverOff">
+                                    <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+                                                                   Storyboard.TargetName="HoverRectangle"
+                                                                   Storyboard.TargetProperty="(UIElement.Opacity)">
+                                        <SplineDoubleKeyFrame KeyTime="00:00:00.4000000"
+                                                              Value="0" />
+                                    </DoubleAnimationUsingKeyFrames>
+                                </Storyboard>
+                                <Storyboard x:Key="SelectedOn">
+                                    <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+                                                                   Storyboard.TargetName="SelectedRectangle"
+                                                                   Storyboard.TargetProperty="(UIElement.Opacity)">
+                                        <SplineDoubleKeyFrame KeyTime="00:00:00.1000000"
+                                                              Value="1" />
+                                    </DoubleAnimationUsingKeyFrames>
+                                </Storyboard>
+                                <Storyboard x:Key="SelectedOff">
+                                    <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+                                                                   Storyboard.TargetName="SelectedRectangle"
+                                                                   Storyboard.TargetProperty="(UIElement.Opacity)">
+                                        <SplineDoubleKeyFrame KeyTime="00:00:00.4000000"
+                                                              Value="0" />
+                                    </DoubleAnimationUsingKeyFrames>
+                                </Storyboard>
+                            </ControlTemplate.Resources>
+                            <Grid>
+                                <Border x:Name="Border"
+                                        BorderBrush="{DynamicResource GridLinesDefaultBrush}"
+                                        BorderThickness="0,0,0,1"
+                                        CornerRadius="0"
+                                        SnapsToDevicePixels="true">
+                                    <Grid Margin="1,0,0,0">
+                                        <Rectangle x:Name="Background"
+                                                   Fill="{DynamicResource NormalRowBrush}"
+                                                   IsHitTestVisible="False"
+                                                   Opacity="0.25"
+                                                   RadiusX="0"
+                                                   RadiusY="0" />
+                                        <Rectangle x:Name="HoverRectangle"
+                                                   Fill="{DynamicResource ItemBackground_Over}"
+                                                   IsHitTestVisible="False"
+                                                   Opacity="0"
+                                                   RadiusX="0"
+                                                   RadiusY="0" />
+                                        <Rectangle x:Name="SelectedRectangle"
+                                                   Fill="{DynamicResource ItemBackground_Selected}"
+                                                   IsHitTestVisible="False"
+                                                   Opacity="0"
+                                                   RadiusX="0"
+                                                   RadiusY="0" />
+                                        <GridViewRowPresenter HorizontalAlignment="Stretch"
+                                                              VerticalAlignment="Stretch"
+                                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                    </Grid>
+                                </Border>
+
+                                <StackPanel x:Name="Loading"
+                                            Margin="0"
+                                            Background="Transparent"
+                                            Cursor="Wait"
+                                            Visibility="Collapsed">
+                                    <StackPanel Margin="5,0,0,0"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Orientation="Horizontal">
+                                        <TextBlock FontSize="{TemplateBinding FontSize}"
+                                                   Foreground="{TemplateBinding Foreground}"
+                                                   Padding="404,4,0,4"
+                                                   Text="Загружается запись " />
+                                        <TextBlock FontSize="{TemplateBinding FontSize}"
+                                                   Foreground="{TemplateBinding Foreground}"
+                                                   Padding="0,4,0,4"
+                                                   Text="{Binding Path=ItemNumber}" />
+                                        <TextBlock FontSize="{TemplateBinding FontSize}"
+                                                   Foreground="{TemplateBinding Foreground}"
+                                                   Padding="0,4,4,4"
+                                                   Text="..." />
+                                    </StackPanel>
+                                    <Rectangle Height="1"
+                                               Fill="{DynamicResource GridLinesDefaultBrush}" />
+                                </StackPanel>
+
+                            </Grid>
+
+                            <ControlTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Path=IsLoading}"
+                                             Value="True">
+                                    <Setter TargetName="Loading" Property="Visibility" Value="Visible" />
+                                    <Setter TargetName="Border" Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard x:Name="SelectedOff_BeginStoryboard"
+                                                         Storyboard="{StaticResource SelectedOff}" />
+                                    </Trigger.ExitActions>
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard x:Name="SelectedOn_BeginStoryboard"
+                                                         Storyboard="{StaticResource SelectedOn}" />
+                                    </Trigger.EnterActions>
+                                </Trigger>
+
+                                <MultiTrigger>
+                                    <MultiTrigger.ExitActions>
+                                        <BeginStoryboard x:Name="HoverOff_BeginStoryboard"
+                                                         Storyboard="{StaticResource HoverOff}" />
+                                    </MultiTrigger.ExitActions>
+                                    <MultiTrigger.EnterActions>
+                                        <BeginStoryboard Storyboard="{StaticResource HoverOn}" />
+                                    </MultiTrigger.EnterActions>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsMouseOver" Value="True" />
+                                        <Condition Property="Selector.IsSelected" Value="False" />
+                                    </MultiTrigger.Conditions>
+                                </MultiTrigger>
+
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="Selector.IsSelected" Value="True" />
+                                        <Condition Property="IsMouseOver" Value="True" />
+                                    </MultiTrigger.Conditions>
+
+                                </MultiTrigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="{DynamicResource DisabledForegroundBrush}" />
+                                    <Setter TargetName="Background" Property="Fill" Value="{DynamicResource CommonDisabledBackgroundBrush}" />
+                                </Trigger>
+
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsSelected" Value="True" />
+                                        <Condition Property="Selector.IsSelectionActive" Value="False" />
+                                    </MultiTrigger.Conditions>
+                                </MultiTrigger>
+
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="Selector.IsSelected" Value="True">
+                        <Setter Property="Foreground" Value="{DynamicResource RowForeground}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+            <Style x:Key="ColorGroupSquareStyle" TargetType="{x:Type Path}" >
+                <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                <Setter Property="RenderTransform">
+                    <Setter.Value>
+                        <ScaleTransform />
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Stroke" Value="{DynamicResource ToolbarGrip1}" />
+                <Setter Property="StrokeThickness" Value="1" />
+                <Setter Property="ToolTip" Value="{Binding Path=Name}" />
+                <Setter Property="Width" Value="18" />
+                <Setter Property="Height" Value="18" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Data" Value="M3,3V21H21V3" />
+                <Setter Property="Fill" Value="{Binding Path=Color,
+                                                                Mode=OneWay,
+                                                                UpdateSourceTrigger=PropertyChanged}" />
+                <Setter Property="Stretch" Value="Uniform" />
+                <Style.Triggers>
+
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Trigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard BeginTime="00:00:00.250">
+                                    <DoubleAnimation Storyboard.TargetProperty="(Ellipse.RenderTransform).(ScaleTransform.ScaleX)"
+                                                         To="1.1">
+                                        <DoubleAnimation.EasingFunction>
+                                            <ElasticEase EasingMode="EaseOut"
+                                                             Oscillations="3" />
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetProperty="(Ellipse.RenderTransform).(ScaleTransform.ScaleY)"
+                                                         To="1.1">
+                                        <DoubleAnimation.EasingFunction>
+                                            <ElasticEase EasingMode="EaseOut"
+                                                             Oscillations="3" />
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="(Ellipse.RenderTransform).(ScaleTransform.ScaleX)"
+                                                         To="1.0">
+                                        <DoubleAnimation.EasingFunction>
+                                            <ElasticEase EasingMode="EaseOut"
+                                                             Oscillations="2" />
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                    <DoubleAnimation Storyboard.TargetProperty="(Ellipse.RenderTransform).(ScaleTransform.ScaleY)"
+                                                         To="1.0">
+                                        <DoubleAnimation.EasingFunction>
+                                            <ElasticEase EasingMode="EaseOut"
+                                                             Oscillations="2" />
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+        </ResourceDictionary>
+
+    </UserControl.Resources>
+
+    <i:Interaction.Triggers>
+        <interactionRequest:InteractionRequestTrigger SourceObject="{Binding Path=ChangeDateTimeRangeRequest, Mode=OneWay}">
+            <interactionRequests:PopupModalWindowAction ContentTemplate="{StaticResource RequestChangeDateTimeRangeTemplate}" />
+        </interactionRequest:InteractionRequestTrigger>
+        <interactionRequest:InteractionRequestTrigger SourceObject="{Binding Path=ExportFailedRequest, Mode=OneWay}">
+            <interactionRequests:PopupModalWindowAction ContentTemplate="{StaticResource ExportFailedRequestTemplate}" />
+        </interactionRequest:InteractionRequestTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid x:Name="LayoutRoot">
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="CommonToolbarRow"
+                           Height="30" />
+            <RowDefinition x:Name="EntryTypeFilterToolbarRow"
+                           Height="0" />
+            <RowDefinition x:Name="ExportEntriesToolbarRow"
+                           Height="0" />
+            <RowDefinition x:Name="AllEntriesRow"
+                           Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--  #Region Основная панель инструментов  -->
+        <telerik:RadToolBar x:Name="CommonToolbar"
+                            Grid.Row="0"
+                            HorizontalAlignment="Stretch"
+                            Panel.ZIndex="200"
+                            telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+
+            <CheckBox x:Name="FilterEntryTypeShowCheckBox"
+                      Margin="2"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Center"
+                      Cursor="Hand"
+                      Focusable="False"
+                      Foreground="{DynamicResource RadToggleButtonContent}"
+                      IsChecked="{Binding FilterEntryTypeIsChecked,
+                                          Mode=OneWay,
+                                          UpdateSourceTrigger=PropertyChanged}"
+                      telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}"
+                      Visibility="{Binding Settings.Version, Converter={StaticResource VersionVisibilityConverter}}">
+                <CheckBox.Content>
+                    <telerik:Label VerticalAlignment="Center"
+                                   Content="По типу сообщений"
+                                   telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+                </CheckBox.Content>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <commands:EventToCommand Command="{Binding Path=FilterEntryTypeClick,
+                                                                   Mode=OneWay}"
+                                                 PassEventArgsToCommand="True" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+
+                <CheckBox.Triggers>
+
+                    <EventTrigger RoutedEvent="ToggleButton.Checked"
+                                  SourceName="FilterEntryTypeShowCheckBox">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ParallelTimeline>
+                                    <infrastructure:GridLengthAnimation Duration="0:0:0.2"
+                                                                        From="0"
+                                                                        Storyboard.TargetName="EntryTypeFilterToolbarRow"
+                                                                        Storyboard.TargetProperty="Height"
+                                                                        To="30">
+                                        <infrastructure:GridLengthAnimation.EasingFunction>
+                                            <QuinticEase EasingMode="EaseOut" />
+                                        </infrastructure:GridLengthAnimation.EasingFunction>
+                                    </infrastructure:GridLengthAnimation>
+                                    <DoubleAnimation Duration="0:0:0.2"
+                                                     Storyboard.TargetName="EntryTypeFilterToolbarPanel"
+                                                     Storyboard.TargetProperty="(telerik:RadToolBar.RenderTransform).(ScaleTransform.ScaleY)"
+                                                     To="1">
+                                        <DoubleAnimation.EasingFunction>
+                                            <QuinticEase EasingMode="EaseOut" />
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </ParallelTimeline>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+
+                    <EventTrigger RoutedEvent="ToggleButton.Unchecked"
+                                  SourceName="FilterEntryTypeShowCheckBox">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ParallelTimeline>
+                                    <infrastructure:GridLengthAnimation Duration="0:0:0.2"
+                                                                        From="30"
+                                                                        Storyboard.TargetName="EntryTypeFilterToolbarRow"
+                                                                        Storyboard.TargetProperty="Height"
+                                                                        To="0">
+                                        <infrastructure:GridLengthAnimation.EasingFunction>
+                                            <QuinticEase EasingMode="EaseIn" />
+                                        </infrastructure:GridLengthAnimation.EasingFunction>
+                                    </infrastructure:GridLengthAnimation>
+                                    <DoubleAnimation Duration="0:0:0.2"
+                                                     Storyboard.TargetName="EntryTypeFilterToolbarPanel"
+                                                     Storyboard.TargetProperty="(telerik:RadToolBar.RenderTransform).(ScaleTransform.ScaleY)"
+                                                     To="0">
+                                        <DoubleAnimation.EasingFunction>
+                                            <QuinticEase EasingMode="EaseIn" />
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </ParallelTimeline>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+
+                </CheckBox.Triggers>
+
+            </CheckBox>
+
+            <telerik:RadToolBarSeparator Visibility="{Binding Settings.Version, Converter={StaticResource VersionVisibilityConverter}}"/>
+
+            <telerik:RadDockPanel x:Name="FilterObjectsListShowButtonElements"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  Visibility="{Binding Settings.Version, Converter={StaticResource VersionVisibilityConverter}}">
+
+                <StackPanel Margin="2"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Orientation="Horizontal"
+                            telerik:RadDockPanel.Dock="Top">
+
+                    <CheckBox Margin="2,0,2,0"
+                              VerticalAlignment="Center"
+                              IsChecked="{Binding Path=FilterObjectsIsChecked,
+                                                  Mode=OneWay,
+                                                  UpdateSourceTrigger=PropertyChanged}"
+                              IsEnabled="{Binding Path=FilterByObjectsIsEnabled}"
+                              telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <commands:EventToCommand Command="{Binding Path=ApplyFilterObjectsClick,
+                                                                           Mode=OneWay}"
+                                                         PassEventArgsToCommand="True" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </CheckBox>
+
+                    <telerik:RadToggleButton x:Name="FilterObjectsListShowButton"
+                                             MinWidth="150"
+                                             Margin="2,0,2,0"
+                                             VerticalAlignment="Center"
+                                             Content="По объекту"
+                                             Cursor="Hand"
+                                             Focusable="False"
+                                             IsChecked="{Binding Path=ObjectsListIsDropDownOpen}"
+                                             telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+
+                        <telerik:RadToggleButton.Triggers>
+
+                            <EventTrigger RoutedEvent="ToggleButton.Checked"
+                                          SourceName="FilterObjectsListShowButton">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Duration="0:0:0.2"
+                                                         Storyboard.TargetName="FilterObjectsListPanel"
+                                                         Storyboard.TargetProperty="(telerik:RadToolBar.RenderTransform).(ScaleTransform.ScaleY)"
+                                                         To="1">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuinticEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+
+                            <EventTrigger RoutedEvent="ToggleButton.Unchecked"
+                                          SourceName="FilterObjectsListShowButton">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Duration="0:0:0.2"
+                                                         Storyboard.TargetName="FilterObjectsListPanel"
+                                                         Storyboard.TargetProperty="(telerik:RadToolBar.RenderTransform).(ScaleTransform.ScaleY)"
+                                                         To="0">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuinticEase EasingMode="EaseIn" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+
+                        </telerik:RadToggleButton.Triggers>
+
+                    </telerik:RadToggleButton>
+
+                </StackPanel>
+
+                <Canvas x:Name="FilterObjectsListPanel"
+                        Height="360"
+                        Margin="26,0,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Canvas.ZIndex="1000"
+                        telerik:RadDockPanel.Dock="Bottom">
+
+                    <Border Background="{DynamicResource ToolbarBackground}"
+                            BorderBrush="{DynamicResource ToolbarGrip1}"
+                            BorderThickness="1"
+                            CornerRadius="0">
+
+                        <telerik:RadBusyIndicator x:Name="FilterObjectsListBusyIndicator"
+                                                  Margin="0,4,0,0"
+                                                  HorizontalAlignment="Stretch"
+                                                  VerticalAlignment="Stretch"
+                                                  BusyContent="Загрузка списка..."
+                                                  IsBusy="{Binding Path=FilterByObjectsListIsLoading}"
+                                                  IsIndeterminate="True"
+                                                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                                  telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+
+                            <StackPanel>
+
+                                <controls:SearchTextBox x:Name="FilterStringForFilterObjectsTree"
+                                                        Margin="5,0,5,0"
+                                                        HorizontalAlignment="Stretch"
+                                                        VerticalContentAlignment="Center"
+                                                        IsEnabled="{Binding Path=FilterByObjectsListIsLoading,
+                                                                            Converter={StaticResource InverseBoolConverter}}"
+                                                        SearchMode="Instant"
+                                                        telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}"
+                                                        Text="{Binding Path=FilterByObjectsSelectedString,
+                                                                       Mode=OneWay,
+                                                                       UpdateSourceTrigger=PropertyChanged}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="Search">
+                                            <commands:EventToCommand Command="{Binding Path=SearchInFilterObjects,
+                                                                                       Mode=OneWay}"
+                                                                     PassEventArgsToCommand="True" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </controls:SearchTextBox>
+
+                                <telerik:RadTreeView x:Name="FilterObjectsTree"
+                                                     Height="300"
+                                                     Margin="5,2,5,0"
+                                                     IsTriStateMode="True"
+                                                     IsVirtualizing="True"
+                                                     ItemsSource="{Binding Path=FilterByObjectsList}"
+                                                     Padding="5"
+                                                     SelectionMode="Single"
+                                                     telerik:AnimationManager.IsAnimationEnabled="False"
+                                                     telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">                                   
+
+                                    <telerik:RadTreeView.ItemTemplate>
+                                        <HierarchicalDataTemplate DataType="viewModels:CategoryViewModel"                                                                  
+                                                                  ItemsSource="{Binding SubCategoriesView}">
+
+                                            <CheckBox Width="320"
+                                                      HorizontalAlignment="Stretch"
+                                                      IsChecked="{Binding IsChecked,
+                                                                          Mode=TwoWay}"
+                                                      IsThreeState="{Binding IsThreeState,
+                                                                             Mode=OneWay}"                                                      
+                                                      telerik:StyleManager.Theme="{Binding Path=DataContext.Settings.CurrentTheme,
+                                                                                           RelativeSource={RelativeSource AncestorType=telerik:RadTreeView,
+                                                                                                                          Mode=FindAncestor}}">
+                                                <CheckBox.IsEnabled>
+                                                    <MultiBinding Converter="{StaticResource MultipleBooleanConverter}" ConverterParameter="|">
+                                                        <MultiBinding.Bindings>
+                                                            <Binding Path="IsThreeState" Mode="OneWay"/>
+                                                            <Binding Path="Id" Mode="OneWay" Converter="{StaticResource ConditionToBooleanConverter}" ConverterParameter="0;!="/>
+                                                        </MultiBinding.Bindings>
+                                                    </MultiBinding>
+                                                </CheckBox.IsEnabled>
+                                                <CheckBox.Focusable>
+                                                    <MultiBinding Converter="{StaticResource MultipleBooleanConverter}" ConverterParameter="|">
+                                                        <MultiBinding.Bindings>
+                                                            <Binding Path="IsThreeState" Mode="OneWay"/>
+                                                            <Binding Path="Id" Mode="OneWay" Converter="{StaticResource ConditionToBooleanConverter}" ConverterParameter="0;!="/>
+                                                        </MultiBinding.Bindings>
+                                                    </MultiBinding>
+                                                </CheckBox.Focusable>
+                                                <CheckBox.Content>
+                                                    <telerik:Label Width="300"
+                                                                   VerticalAlignment="Center"
+                                                                   HorizontalContentAlignment="Left"
+                                                                   Content="{Binding Name}"
+                                                                   telerik:StyleManager.Theme="{Binding Path=DataContext.Settings.CurrentTheme,
+                                                                                                        RelativeSource={RelativeSource AncestorType=telerik:RadTreeView,
+                                                                                                                                       Mode=FindAncestor}}"
+                                                                   ToolTip="{Binding Name}" />
+
+                                                </CheckBox.Content>
+
+                                                <i:Interaction.Triggers>
+                                                    <i:EventTrigger EventName="MouseDown">
+                                                        <commands:EventToCommand Command="{Binding Path=ClickCommand,
+                                                                                                   Mode=OneWay}"
+                                                                                 PassEventArgsToCommand="False" />
+                                                    </i:EventTrigger>
+                                                </i:Interaction.Triggers>
+                                            </CheckBox>
+                                        </HierarchicalDataTemplate>
+                                    </telerik:RadTreeView.ItemTemplate>
+
+                                </telerik:RadTreeView>
+
+                                <StackPanel Margin="5,0,5,0"
+                                            HorizontalAlignment="Center"
+                                            Orientation="Horizontal"
+                                            telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+
+                                    <telerik:RadButton MinWidth="150"
+                                                       Margin="4"
+                                                       Command="{Binding Path=ApplyFilterObjectsClick}"
+                                                       Content="Применить"
+                                                       Cursor="Hand"
+                                                       IsEnabled="{Binding Path=ApplyFilterByObjectsCommandIsEnabled}"
+                                                       telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+                                    <telerik:RadButton MinWidth="150"
+                                                       Margin="4"
+                                                       Command="{Binding Path=ResetFilterObjects}"
+                                                       Content="Сброс"
+                                                       Cursor="Hand"
+                                                       IsEnabled="{Binding Path=ResetFilterObjectsCommandIsEnabled}"
+                                                       telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+                                </StackPanel>
+
+                            </StackPanel>
+
+                        </telerik:RadBusyIndicator>
+
+                    </Border>
+
+                    <Canvas.RenderTransform>
+                        <ScaleTransform ScaleY="0" />
+                    </Canvas.RenderTransform>
+
+                </Canvas>
+
+            </telerik:RadDockPanel>
+
+            <telerik:RadToolBarSeparator Visibility="{Binding Settings.Version, Converter={StaticResource VersionVisibilityConverter}}"/>
+
+            <!-- #Region Colors -->
+            <telerik:RadDockPanel x:Name="FilterColorListShowButtonElements"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  Visibility="{Binding Settings.Version, Converter={StaticResource VersionVisibilityConverter}}">
+
+                <StackPanel Margin="2"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Orientation="Horizontal"
+                            telerik:RadDockPanel.Dock="Top">
+
+                    <CheckBox Margin="2,0,2,0"
+                              VerticalAlignment="Center"
+                              IsChecked="{Binding Path=FilterColorsIsChecked,
+                                                  Mode=OneWay,
+                                                  UpdateSourceTrigger=PropertyChanged}"
+                              IsEnabled="{Binding Path=FilterByColorsIsEnabled}"
+                              telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <commands:EventToCommand Command="{Binding Path=ApplyFilterColorsClick,
+                                                                           Mode=OneWay}"
+                                                         PassEventArgsToCommand="True" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </CheckBox>
+
+                    <StackPanel x:Name="SelectedColors"
+                                VerticalAlignment="Center"
+                                Margin="1">
+                        <ItemsControl ItemsSource="{Binding Path=AppliedFilterByColorsList}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" 
+                                                Margin="1" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="moduleSettings:JournalColorGroupViewModel">
+                                    <Path Style="{StaticResource ColorGroupSquareStyle}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <telerik:RadToggleButton x:Name="FilterColorsListShowButton"
+                                             MinWidth="150"
+                                             Margin="2,0,2,0"
+                                             IsEnabled="{Binding Path=FilterColorsListButtonIsEnabled}"
+                                             VerticalAlignment="Center"
+                                             Content="По цвету"
+                                             Cursor="Hand"
+                                             Focusable="False"
+                                             IsChecked="{Binding Path=ColorsListIsDropDownOpen}"
+                                             telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+
+                        <telerik:RadToggleButton.Triggers>
+
+                            <EventTrigger RoutedEvent="ToggleButton.Checked"
+                                          SourceName="FilterColorsListShowButton">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Duration="0:0:0.2"
+                                                         Storyboard.TargetName="FilterColorsListPanel"
+                                                         Storyboard.TargetProperty="(telerik:RadToolBar.RenderTransform).(ScaleTransform.ScaleY)"
+                                                         To="1">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuinticEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+
+                            <EventTrigger RoutedEvent="ToggleButton.Unchecked"
+                                          SourceName="FilterColorsListShowButton">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Duration="0:0:0.2"
+                                                         Storyboard.TargetName="FilterColorsListPanel"
+                                                         Storyboard.TargetProperty="(telerik:RadToolBar.RenderTransform).(ScaleTransform.ScaleY)"
+                                                         To="0">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuinticEase EasingMode="EaseIn" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+
+                        </telerik:RadToggleButton.Triggers>
+
+                    </telerik:RadToggleButton>
+
+                </StackPanel>
+
+                <Canvas x:Name="FilterColorsListPanel"
+                        Height="360"
+                        Margin="26,0,0,0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Canvas.ZIndex="1000"
+                        telerik:RadDockPanel.Dock="Bottom">
+
+                    <Border Background="{DynamicResource ToolbarBackground}"
+                            BorderBrush="{DynamicResource ToolbarGrip1}"
+                            BorderThickness="1"
+                            Margin="0,4,0,0"
+                            CornerRadius="0">
+
+                        <StackPanel>
+
+                            <telerik:RadTreeView x:Name="FilterColorsTree"
+                                                    Height="300"
+                                                    Margin="5,2,5,0"
+                                                    IsTriStateMode="True"
+                                                    IsVirtualizing="True"
+                                                    ItemsSource="{Binding Path=FilterByColorsList.Items}"
+                                                    Padding="5"
+                                                    SelectionMode="Single"
+                                                    telerik:AnimationManager.IsAnimationEnabled="False"
+                                                    telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+
+                                <telerik:RadTreeView.ItemTemplate>
+                                    <HierarchicalDataTemplate DataType="moduleSettings:JournalColorGroupViewModel">
+
+                                        <CheckBox Width="320"
+                                                    HorizontalAlignment="Stretch"
+                                                    IsChecked="{Binding Path=IsChecked,
+                                                                        Mode=TwoWay}"
+                                                    IsThreeState="False"
+                                                    IsEnabled="{Binding Path=IsEnabled}"
+                                                    telerik:StyleManager.Theme="{Binding Path=DataContext.Settings.CurrentTheme,
+                                                                                        RelativeSource={RelativeSource AncestorType=telerik:RadTreeView,
+                                                                                                                        Mode=FindAncestor}}">
+                                            <CheckBox.Content>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Path Style="{StaticResource ColorGroupSquareStyle}" />
+
+                                                    <TextBlock Width="300"
+                                                               Margin="4 0 0 0"
+                                                                TextWrapping="Wrap"
+                                                                VerticalAlignment="Center"
+                                                                HorizontalAlignment="Left"
+                                                                TextAlignment="Left"
+                                                                Text="{Binding Name}"
+                                                                telerik:StyleManager.Theme="{Binding Path=DataContext.Settings.CurrentTheme,
+                                                                                                    RelativeSource={RelativeSource AncestorType=telerik:RadTreeView,
+                                                                                                                                    Mode=FindAncestor}}"
+                                                                ToolTip="{Binding Name}" />
+                                                </StackPanel>
+                                            </CheckBox.Content>
+                                        </CheckBox>
+                                    </HierarchicalDataTemplate>
+                                </telerik:RadTreeView.ItemTemplate>
+
+                            </telerik:RadTreeView>
+                            
+                            <StackPanel Margin="5,0,5,0"
+                                        HorizontalAlignment="Center"
+                                        Orientation="Horizontal"
+                                        telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+
+                                <telerik:RadButton MinWidth="150"
+                                                    Margin="4"
+                                                    Command="{Binding Path=ApplyFilterColorsClick}"
+                                                    Content="Применить"
+                                                    Cursor="Hand"
+                                                    IsEnabled="{Binding Path=ApplyFilterByColorsCommandIsEnabled}"
+                                                    telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+                                <telerik:RadButton MinWidth="150"
+                                                    Margin="4"
+                                                    Command="{Binding Path=ResetFilterColors}"
+                                                    Content="Отображать все"
+                                                    Cursor="Hand"
+                                                    IsEnabled="{Binding Path=ResetFilterColorsCommandIsEnabled}"
+                                                    telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+                            </StackPanel>
+
+                        </StackPanel>
+
+                    </Border>
+
+                    <Canvas.RenderTransform>
+                        <ScaleTransform ScaleY="0" />
+                    </Canvas.RenderTransform>
+
+                </Canvas>
+
+            </telerik:RadDockPanel>
+
+            <telerik:RadToolBarSeparator Visibility="{Binding Settings.Version, Converter={StaticResource VersionVisibilityConverter}}"/>
+
+            <telerik:RadWatermarkTextBox x:Name="SearchStringForMessagesFilter"
+                                    Width="200"
+                                    Margin="2"
+                                    Focusable="True"
+                                    IsEnabled="True"
+                                    Padding="5 0 5 0"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalContentAlignment="Center"
+                                    telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}"
+                                    WatermarkContent="Введите текст для поиска..." 
+                                    SelectionOnFocus="SelectAll"
+                                    Text="{Binding Path=FilterByMessageText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <telerik:RadToolBarSeparator />
+
+            <!--  Выбор режима работы журнала  -->
+            <telerik:Label Margin="4,0,4,0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"
+                           Content="Реальное время"
+                           Cursor="Hand"
+                           telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDown">
+                        <commands:EventToCommand Command="{Binding Path=JournalModeSelectorLabelClick,
+                                                                   Mode=OneWay}"
+                                                 CommandParameter="{x:Static enumerations:DataSourceMode.RealTime}"
+                                                 PassEventArgsToCommand="True" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </telerik:Label>
+
+            <Slider x:Name="JournalModeSelector"
+                    Width="35"
+                    Height="12"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    AutoToolTipPlacement="TopLeft"
+                    Cursor="Hand"
+                    Interval="31"
+                    IsSnapToTickEnabled="True"
+                    Maximum="1"
+                    SmallChange="1"
+                    Style="{DynamicResource ChartSliderStyle}"
+                    TickPlacement="None"
+                    Value="{Binding JournalMode,
+                                    Converter={StaticResource DataSourceModeToDoubleConverter},
+                                    Mode=TwoWay}" />
+
+            <telerik:Label Margin="4,0,4,0"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Content="Архив"
+                           Cursor="Hand"
+                           telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDown">
+                        <commands:EventToCommand Command="{Binding Path=JournalModeSelectorLabelClick,
+                                                                   Mode=OneWay}"
+                                                 CommandParameter="{x:Static enumerations:DataSourceMode.Archive}"
+                                                 PassEventArgsToCommand="True" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </telerik:Label>
+
+            <!--  Панель инструментов с выбором периода  -->
+            <Canvas x:Name="SelectDateTimeToolbarPanel"
+                    Grid.Row="1"
+                    Width="500"
+                    Height="30"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top"
+                    Canvas.ZIndex="100">
+
+                <StackPanel Width="500"
+                            Orientation="Horizontal">
+
+                    <telerik:RadToolBarSeparator />
+
+                    <telerik:Label Margin="4,0,4,0"
+                                   VerticalAlignment="Center"
+                                   Content="Данные с"
+                                   telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+                    <telerik:RadDateTimePicker x:Name="DateTimeStart"
+                                               Width="130"
+                                               Margin="0,2,0,2"
+                                               DisplayDateEnd="{Binding Path=DateTimePickerEnd,
+                                                                        Mode=OneWay,
+                                                                        UpdateSourceTrigger=PropertyChanged}"
+                                               Focusable="True"
+                                               InputMode="DateTimePicker"
+                                               IsEnabled="{Binding Path=BusyIndicatorState,
+                                                                   Converter={StaticResource BooleanInverter}}"
+                                               IsReadOnly="False"
+                                               SelectedValue="{Binding Path=DateTimePickerStart,
+                                                                       Mode=TwoWay,
+                                                                       UpdateSourceTrigger=LostFocus,
+                                                                       StringFormat='dd.MM.yyyy HH:mm',
+                                                                       ValidatesOnDataErrors=True}"
+                                               telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+                    <telerik:Label Margin="4,0,4,0"
+                                   VerticalAlignment="Center"
+                                   Content="по"
+                                   telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+                    <telerik:RadDateTimePicker x:Name="DateTimeEnd"
+                                               Width="130"
+                                               Margin="0,2,4,2"
+                                               DisplayDateStart="{Binding Path=DateTimePickerStart,
+                                                                          Mode=OneWay,
+                                                                          UpdateSourceTrigger=PropertyChanged}"
+                                               Focusable="True"
+                                               InputMode="DateTimePicker"
+                                               IsEnabled="{Binding Path=BusyIndicatorState,
+                                                                   Converter={StaticResource BooleanInverter}}"
+                                               IsReadOnly="False"
+                                               SelectedValue="{Binding Path=DateTimePickerEnd,
+                                                                       Mode=TwoWay,
+                                                                       UpdateSourceTrigger=LostFocus,
+                                                                       StringFormat='dd.MM.yyyy HH:mm',
+                                                                       ValidatesOnDataErrors=True}"
+                                               telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+                    <telerik:RadToolBarSeparator />
+
+                    <telerik:RadButton x:Name="FilterDateTimeApply"
+                                       Margin="2"
+                                       Command="{Binding Path=FilterDateTimeApply}"
+                                       Content="Применить"
+                                       Focusable="True"
+                                       IsEnabled="{Binding Path=FilterDateTimeIsEnabled}"
+                                       telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+                    <telerik:RadToolBarSeparator />
+
+                    <telerik:RadToggleButton x:Name="EventsExportButton"
+                                             Width="25"
+                                             Height="25"
+                                             Margin="4,0,4,0"
+                                             VerticalAlignment="Center"
+                                             Content="{StaticResource ExportIco}"
+                                             Focusable="False"
+                                             IsChecked="{Binding Path=ExportIsChecked,
+                                                                 Mode=OneWay,
+                                                                 UpdateSourceTrigger=PropertyChanged}"
+                                             IsEnabled="{Binding Path=ExportIsEnabled}"
+                                             Visibility="{Binding IsExportButtonVisible, Mode=OneWay, Converter={converters:BoolToVisibilityConverter}}"
+                                             telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}"
+                                             ToolTip="Экспорт журнала">
+
+                        <telerik:RadToggleButton.InputBindings>
+                            <MouseBinding Command="{Binding Path=EventsExport}"
+                                          CommandParameter="{Binding}"
+                                          Gesture="LeftClick" />
+                        </telerik:RadToggleButton.InputBindings>
+
+                        <telerik:RadToggleButton.Triggers>
+
+                            <EventTrigger RoutedEvent="ToggleButton.Checked"
+                                          SourceName="EventsExportButton">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ParallelTimeline>
+                                            <infrastructure:GridLengthAnimation Duration="0:0:0.2"
+                                                                                From="0"
+                                                                                Storyboard.TargetName="ExportEntriesToolbarRow"
+                                                                                Storyboard.TargetProperty="Height"
+                                                                                To="30">
+                                                <infrastructure:GridLengthAnimation.EasingFunction>
+                                                    <QuinticEase EasingMode="EaseOut" />
+                                                </infrastructure:GridLengthAnimation.EasingFunction>
+                                            </infrastructure:GridLengthAnimation>
+                                            <DoubleAnimation Duration="0:0:0.2"
+                                                             Storyboard.TargetName="ExportEntriesToolbarPanel"
+                                                             Storyboard.TargetProperty="(telerik:RadToolBar.RenderTransform).(ScaleTransform.ScaleY)"
+                                                             To="1">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <QuinticEase EasingMode="EaseOut" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </ParallelTimeline>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+
+                            <EventTrigger RoutedEvent="ToggleButton.Unchecked"
+                                          SourceName="EventsExportButton">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ParallelTimeline>
+                                            <infrastructure:GridLengthAnimation Duration="0:0:0.2"
+                                                                                From="30"
+                                                                                Storyboard.TargetName="ExportEntriesToolbarRow"
+                                                                                Storyboard.TargetProperty="Height"
+                                                                                To="0">
+                                                <infrastructure:GridLengthAnimation.EasingFunction>
+                                                    <QuinticEase EasingMode="EaseIn" />
+                                                </infrastructure:GridLengthAnimation.EasingFunction>
+                                            </infrastructure:GridLengthAnimation>
+                                            <DoubleAnimation Duration="0:0:0.2"
+                                                             Storyboard.TargetName="ExportEntriesToolbarPanel"
+                                                             Storyboard.TargetProperty="(telerik:RadToolBar.RenderTransform).(ScaleTransform.ScaleY)"
+                                                             To="0">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <QuinticEase EasingMode="EaseIn" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </ParallelTimeline>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+
+                        </telerik:RadToggleButton.Triggers>
+
+                    </telerik:RadToggleButton>
+
+                </StackPanel>
+
+                <Canvas.Style>
+
+                    <Style TargetType="Canvas">
+                        <Style.Triggers>
+
+                            <DataTrigger Binding="{Binding Path=JournalMode}"
+                                         Value="{x:Static enumerations:DataSourceMode.Archive}">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard x:Name="BeginExpandDateTimeToolbarPanel">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0:0:0.2"
+                                                             Storyboard.TargetProperty="(Canvas.RenderTransform).(ScaleTransform.ScaleX)"
+                                                             To="1">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <QuinticEase EasingMode="EaseOut" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <StopStoryboard BeginStoryboardName="BeginExpandDateTimeToolbarPanel" />
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding Path=JournalMode}"
+                                         Value="{x:Static enumerations:DataSourceMode.RealTime}">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard x:Name="BeginCollapseDateTimeToolbarPanel">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0:0:0.2"
+                                                             Storyboard.TargetProperty="(Canvas.RenderTransform).(ScaleTransform.ScaleX)"
+                                                             To="0">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <QuinticEase EasingMode="EaseIn" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <StopStoryboard BeginStoryboardName="BeginCollapseDateTimeToolbarPanel" />
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+
+                </Canvas.Style>
+
+                <Canvas.RenderTransform>
+                    <ScaleTransform ScaleX="0" />
+                </Canvas.RenderTransform>
+
+            </Canvas>
+
+        </telerik:RadToolBar>
+        <!--  #EndRegion Основная панель инструментов  -->
+
+        <!--  #Region Панель инструментов с кнопками фильтрации по типу сообщения  -->
+        <Canvas x:Name="EntryTypeFilterToolbarPanel"
+                Grid.Row="1"
+                Width="{Binding ElementName=CommonToolbar,
+                                Path=ActualWidth}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top"
+                Canvas.ZIndex="100">
+
+            <telerik:RadToolBar x:Name="EntryTypeFilterToolbar"
+                                Width="{Binding ElementName=CommonToolbar,
+                                                Path=ActualWidth}"
+                                Height="30"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Top"
+                                IsEnabled="{Binding Path=BusyIndicatorState,
+                                                    Converter={StaticResource InverseBoolConverter}}"
+                                telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+
+                <telerik:RadToggleButton x:Name="FilterEntryTypeSystemState"
+                                         MinWidth="150"
+                                         Margin="2"
+                                         Content="Состояние системы"
+                                         Cursor="Hand"
+                                         Focusable="False"
+                                         IsChecked="{Binding FilterEntryTypeSystemStateIsChecked,
+                                                             Mode=TwoWay}"
+                                         telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+                <telerik:RadToggleButton x:Name="FilterEntryTypeLeakageDetection"
+                                         MinWidth="150"
+                                         Margin="2"
+                                         Content="Контроль герметичности"
+                                         Cursor="Hand"
+                                         Focusable="False"
+                                         IsChecked="{Binding FilterEntryTypeLeakageDetectionIsChecked,
+                                                             Mode=TwoWay}"
+                                         telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+                <telerik:RadToggleButton x:Name="FilterEntryTypeHeadPressureControl"
+                                         MinWidth="150"
+                                         Margin="2"
+                                         Content="Контроль гидроуклона"
+                                         Cursor="Hand"
+                                         Focusable="False"
+                                         IsChecked="{Binding FilterEntryTypeHeadPressureControlIsChecked,
+                                                             Mode=TwoWay}"
+                                         telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}"
+                                         Visibility="{Binding FilterEntryTypeHeadPressureControlIsVisible,
+                                                              Mode=OneWay,
+                                                              Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                <telerik:RadToggleButton x:Name="FilterEntryTypePIGControl"
+                                         MinWidth="150"
+                                         Margin="2"
+                                         Content="Контроль СОД"
+                                         Cursor="Hand"
+                                         Focusable="False"
+                                         IsChecked="{Binding FilterEntryTypePIGControlIsChecked,
+                                                             Mode=TwoWay}"
+                                         telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}"
+                                         Visibility="{Binding FilterEntryTypePIGControlIsVisible,
+                                                              Mode=OneWay,
+                                                              Converter={StaticResource BooleanToVisibilityConverter}}" />
+                
+                <telerik:RadToggleButton x:Name="FilterEntryTypeSystemMessages"
+                                         MinWidth="150"
+                                         Margin="2"
+                                         Content="Системные сообщения"
+                                         Cursor="Hand"
+                                         Focusable="False"
+                                         IsChecked="{Binding FilterEntryTypeSystemMessagesIsChecked,
+                                                             Mode=TwoWay}"
+                                         telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}"
+                                         Visibility="{Binding FilterEntryTypeSystemMessagesIsVisible,
+                                                              Mode=OneWay,
+                                                              Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                <telerik:RadToggleButton x:Name="FilterEntryTypeUserActions"
+                                         MinWidth="150"
+                                         Margin="2"
+                                         Content="Действия пользователя"
+                                         Cursor="Hand"
+                                         Focusable="False"
+                                         IsChecked="{Binding FilterEntryTypeUserActionsIsChecked,
+                                                             Mode=TwoWay}"
+                                         telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}"
+                                         Visibility="{Binding FilterEntryTypeUserActionsIsVisible,
+                                                              Mode=OneWay,
+                                                              Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+            </telerik:RadToolBar>
+
+            <Canvas.RenderTransform>
+                <ScaleTransform ScaleY="0" />
+            </Canvas.RenderTransform>
+
+        </Canvas>
+        <!--  #EndRegion Панель инструментов с кнопками фильтрации по типу сообщения  -->
+
+        <!--  #Region Панель инструментов с отображением статуса экспорта журнала  -->
+        <Canvas x:Name="ExportEntriesToolbarPanel"
+                Grid.Row="2"
+                Width="{Binding ElementName=CommonToolbar,
+                                Path=ActualWidth}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top"
+                Canvas.ZIndex="100">
+
+            <telerik:RadToolBar x:Name="ExportEntriesToolbar"
+                                Width="{Binding ElementName=CommonToolbar,
+                                                Path=ActualWidth}"
+                                Height="30"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Top"
+                                HorizontalContentAlignment="Right"
+                                IsEnabled="{Binding Path=ExportIsChecked}"
+                                telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+
+                <telerik:Label Margin="4,0,4,0"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Content="Экспорт журнала"
+                               telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+                <Grid x:Name="ExportProgressBar"
+                      Width="300"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Stretch">
+                    <telerik:RadProgressBar Width="{Binding ElementName=ExportProgressBar,
+                                                            Path=ActualWidth}"
+                                            Height="20"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Center"
+                                            IsIndeterminate="False"
+                                            Orientation="Horizontal"
+                                            telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}"
+                                            Value="{Binding Path=ExportProgress}" />
+
+                    <telerik:Label Width="{Binding ElementName=ExportProgressBar,
+                                                   Path=ActualWidth}"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   HorizontalContentAlignment="Center"
+                                   Content="{Binding ExportProgressMessage}"
+                                   telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+                </Grid>
+
+                <telerik:RadButton MinWidth="150"
+                                   Margin="4,2,4,2"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   Command="{Binding Path=CancelExport}"
+                                   Content="Отменить"
+                                   Cursor="Hand"
+                                   Focusable="False"
+                                   IsEnabled="{Binding Path=ExportIsChecked}"
+                                   telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}" />
+
+            </telerik:RadToolBar>
+
+            <Canvas.RenderTransform>
+                <ScaleTransform ScaleY="0" />
+            </Canvas.RenderTransform>
+
+        </Canvas>
+        <!--  #EndRegion Панель инструментов с отображением статуса экспорта журнала  -->
+
+        <!--  #Region Записи  -->
+        <telerik:RadBusyIndicator x:Name="AllEventsListViewBusyIndicator"
+                                  Grid.Row="3"
+                                  Margin="0"
+                                  Focusable="False"
+                                  IsTabStop="False"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  BusyContent="{Binding Path=BusyIndicatorMessage}"
+                                  IsBusy="{Binding Path=BusyIndicatorState}"
+                                  IsIndeterminate="{Binding Path=BusyIndicatorIsIndeterminate}"
+                                  telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}">
+
+            <controls1:ListViewEx x:Name="AllEventsListView"
+                                  ctrl:ListViewLayoutManager.Enabled="True"
+                                  BorderThickness="1"
+                                  IsSynchronizedWithCurrentItem="False"
+                                  ScrollViewer.CanContentScroll="True"
+                                  ScrollViewer.IsDeferredScrollingEnabled="True"
+                                  SelectionMode="Single"
+                                  Style="{StaticResource CustomListViewStyle}"
+                                  telerik:StyleManager.Theme="{Binding Path=Settings.CurrentTheme}"
+                                  VirtualizingStackPanel.IsVirtualizing="True">
+
+                <controls1:ListViewEx.ItemsSource>
+                    <PriorityBinding FallbackValue="defaultvalue">
+                        <Binding IsAsync="True"
+                                 Mode="OneWay"
+                                 Path="AllEntries"
+                                 UpdateSourceTrigger="PropertyChanged" />
+                    </PriorityBinding>
+                </controls1:ListViewEx.ItemsSource>
+
+                <controls1:ListViewEx.ItemContainerStyle>
+                    <Style BasedOn="{StaticResource CustomListViewItemStyle}"
+                           TargetType="{x:Type ListViewItem}">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </controls1:ListViewEx.ItemContainerStyle>
+
+                <controls1:ListViewEx.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <controls:VirtualizingStackPanelEnh CanHorizontallyScroll="False"
+                                                            IsVirtualizing="True"
+                                                            VirtualizationMode="Recycling" />
+                    </ItemsPanelTemplate>
+                </controls1:ListViewEx.ItemsPanel>
+
+                <controls1:ListViewEx.View>
+                    <GridView AllowsColumnReorder="False">
+
+                        <GridViewColumn Width="140"
+                                        ctrl:FixedColumn.Width="140"
+                                        Header="Время">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="viewModels2:JournalEntryViewModel">
+                                    <TextBlock x:Name="TimeStamp"
+                                               Background="{Binding Path=Data.Color, Mode=OneWay, Converter={StaticResource ColorToBrushConverter}}"
+                                               HorizontalAlignment="Stretch"
+                                               VerticalAlignment="Stretch"
+                                               Margin="-6 0 -6 0"
+                                               Padding="0 4 0 4"
+                                               Text="{Binding Path=Data.TimeStamp,
+                                                              Mode=OneWay,
+                                                              StringFormat=\{0:dd.MM.yyyy HH:mm:ss\}}"
+                                               TextAlignment="Center" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        
+                        <GridViewColumn Width="250"
+                                        ctrl:RangeColumn.MinWidth="250"
+                                        ctrl:RangeColumn.MaxWidth="500"
+                                        Header="Наименование">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="viewModels2:JournalEntryViewModel">
+                                    <TextBlock x:Name="ObjectName"
+                                               Background="{Binding Path=Data.Color, Mode=OneWay, Converter={StaticResource ColorToBrushConverter}}"
+                                               HorizontalAlignment="Stretch"
+                                               VerticalAlignment="Stretch"
+                                               Margin="-6 0 -6 0"
+                                               Padding="0 4 0 4"
+                                               Text="{Binding Path=Data.ObjectName,
+                                                              Mode=OneWay}"
+                                               TextAlignment="Left"
+                                               TextTrimming="CharacterEllipsis"
+                                               TextWrapping="NoWrap">
+                                        <TextBlock.ToolTip>
+                                            <ToolTip Visibility="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget, Converter={StaticResource TrimmedTextBlockVisibilityConverter}}">
+                                                <ToolTip.Content>
+                                                    <TextBlock Text="{Binding Path=Data.ObjectName, Mode=OneWay}" />
+                                                </ToolTip.Content>
+                                            </ToolTip>
+                                        </TextBlock.ToolTip>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn ctrl:RangeColumn.MinWidth="400"
+                                        ctrl:RangeColumn.IsFillColumn="True"
+                                        Header="Сообщение">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="viewModels2:JournalEntryViewModel">
+                                    <TextBlock x:Name="Message"
+                                               Background="{Binding Path=Data.Color, Mode=OneWay, Converter={StaticResource ColorToBrushConverter}}"
+                                               HorizontalAlignment="Stretch"
+                                               VerticalAlignment="Stretch"
+                                               Margin="-6 0 -6 0"
+                                               Padding="0 4 0 4"
+                                               Text="{Binding Path=Data.Message,
+                                                              Mode=OneWay}"
+                                               TextAlignment="Left"
+                                               TextWrapping="Wrap">
+                                        <TextBlock.ToolTip>
+                                            <ToolTip Visibility="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget, Converter={StaticResource TrimmedTextBlockVisibilityConverter}}">
+                                                <ToolTip.Content>
+                                                    <TextBlock Text="{Binding Path=Data.Message, Mode=OneWay}" />
+                                                </ToolTip.Content>
+                                            </ToolTip>
+                                        </TextBlock.ToolTip>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </controls1:ListViewEx.View>
+
+                <i:Interaction.Behaviors>
+                    <behaviors:AutoScrollBehavior />
+                </i:Interaction.Behaviors>
+
+            </controls1:ListViewEx>
+
+        </telerik:RadBusyIndicator>
+
+        <!--  #EndRegion Записи  -->
+
+        <mvvmAnimation:ViewModelChangeDispatcher OnSourceChangedStartStoryboard="{StaticResource LayoutRootShow}"
+                                                 Source="{Binding Path=IsActive}" />
+
+    </Grid>
+
+</UserControl>
